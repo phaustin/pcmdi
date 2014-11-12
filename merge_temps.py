@@ -46,8 +46,10 @@ def assemble_files(name_rex):
     return pieces
 
 
-def global_averge(name_rex=None,area_rex=None):
+def global_average(name_rex=None,area_rex=None,nc_dir=None):
+    name_rex=nc_dir + name_rex
     pieces=assemble_files(name_rex)
+    area_rex=nc_dir + area_rex
     cell_file=glob.glob(area_rex)[0]
     cell_nc=Dataset(cell_file)
     areas=cell_nc.variables['areacella'][...]
@@ -79,17 +81,14 @@ def global_averge(name_rex=None,area_rex=None):
 
 def find_time(name_rex,the_date=None):
     """
-       find the closest time to the_date
+       find a segment containing a date
     """
     pieces=assemble_files(name_rex)
     for the_piece in pieces:
         print_vars=[the_piece['nc_file'].model_id,the_piece['nc_file'].experiment,
                     the_piece['datetimes'][0],the_piece['datetimes'][-1]]
         print "{}  {}  {}  {}".format(*print_vars) 
-    
-    
-
-    
+        "to be continued"
 
 if __name__=="__main__":
 
@@ -116,10 +115,11 @@ if __name__=="__main__":
 
 
     plt.close('all')
-    for case_dict in case_list:                      
-        avg_keys=['name_rex','area_rex']
+    for case_dict in case_list:
+        case_dict['nc_dir']='/pip_raid/phil/gcm_e340/ncfiles/'                      
+        avg_keys=['name_rex','area_rex','nc_dir']
         args={k: case_dict[k] for k in avg_keys}
-        years,temps=global_averge(**args)
+        years,temps=global_average(**args)
         fig=plt.figure()
         fig.clf()
         ax1=fig.add_subplot(111)
@@ -127,8 +127,7 @@ if __name__=="__main__":
         ax1.set_xlabel('years')
         ax1.set_ylabel('surface temp (K)')
         ax1.set_title(case_dict['title'])
-        plt.plot(years,temps)
         plt.show()
 
 
-    find_time(name_rex='ts*GISS-E2-R_abrupt4xCO2*nc')    
+    #find_time(name_rex='ts*GISS-E2-R_abrupt4xCO2*nc')    
